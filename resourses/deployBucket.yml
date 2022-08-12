@@ -11,4 +11,4 @@ Resources:
   MyBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'pkg-deploy-bucket-${EnvName}'
+      BucketName: !Sub 'test-deploy-bucket-${EnvName}'
