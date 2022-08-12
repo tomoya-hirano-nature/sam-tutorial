@@ -12,7 +12,7 @@ Resources:
   StreamDataBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "pkg-stream-data-bucket-${EnvName}"
+      BucketName: !Sub "test-stream-data-bucket-${EnvName}"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
