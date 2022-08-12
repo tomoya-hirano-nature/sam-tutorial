@@ -8,10 +8,10 @@ Parameters:
     Description: "Your environment name here"
     Type: String
     Default: defalt
-  CloudWatchAlarmEmail:
-    Description: "The e-mail to notify errors"
-    Type: String
-    Default: ""
+#   CloudWatchAlarmEmail:
+#     Description: "The e-mail to notify errors"
+#     Type: String
+#     Default: ""
 
 Resources:
   # AuthLayer:
