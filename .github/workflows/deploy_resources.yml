@@ -41,7 +41,6 @@ jobs:
 
   
   sam-deploy:
-    needs: prepare_auth_layer
     runs-on: ubuntu-18.04
 
     steps:
