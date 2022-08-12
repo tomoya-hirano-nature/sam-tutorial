@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Creating PKG basic backend environment.
+Parameters:
+  EnvName:
+    Description: "Your environment name here"
+    Type: String
+    Default: defalt
+
+Resources:
+  StreamDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "pkg-stream-data-bucket-${EnvName}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true

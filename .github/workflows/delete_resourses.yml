@@ -1,0 +1,46 @@
+on:
+  delete
+
+jobs:
+  delete_stack:
+    name: Delete Stacks
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.ref, 'feature-')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14'
+
+      - name: "Configure AWS credentials"
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: make s3 empty
+        run: |
+          aws s3 rm s3://pkg-deploy-bucket-${{ github.event.ref }} --recursive
+
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: make s3 empty
+        run: |
+          aws s3 rm s3://pkg-stream-data-bucket-${{ github.event.ref }} --recursive
+
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: delete stack relating to deploy bucket
+        run: |
+          aws cloudformation delete-stack --stack-name create-s3-for-pkg-deploy-${{ github.event.ref }}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: delete stack relating to deploy bucket
+        run: |
+          aws cloudformation delete-stack --stack-name pkg-deploy-resources-${{ github.event.ref }}

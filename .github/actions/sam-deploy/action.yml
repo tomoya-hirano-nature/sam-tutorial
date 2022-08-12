@@ -1,0 +1,19 @@
+name: "sam-deploy"
+
+inputs:
+  AWS_CLOUDWATCH_ALARM_EMAIL:
+    description: cloudwatchAlermの配信先
+    default: ""
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        sam deploy --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --stack-name pkg-deploy-resources-${GITHUB_REF#refs/heads/} \
+            --s3-bucket pkg-deploy-bucket-${GITHUB_REF#refs/heads/} \
+            --parameter-overrides EnvName=${GITHUB_REF#refs/heads/} \
+                                  CloudWatchAlarmEmail=${{ inputs.AWS_CLOUDWATCH_ALARM_EMAIL }}
+      shell: bash

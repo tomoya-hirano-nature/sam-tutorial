@@ -1,0 +1,16 @@
+name: "sam-build"
+
+inputs:
+  AWS_CLOUDWATCH_ALARM_EMAIL:
+    description: cloudwatchAlermの配信先
+    default: ""
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        sam build --use-container \
+            --parameter-overrides EnvName=${GITHUB_REF#refs/heads/}\
+                                  CloudWatchAlarmEmail=${{ inputs.AWS_CLOUDWATCH_ALARM_EMAIL }}
+      shell: bash
