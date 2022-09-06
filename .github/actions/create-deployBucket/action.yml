@@ -1,6 +1,6 @@
 name: "sam-build"
 runs:
-  using: "composite"
+  using: "composite"  #これでコンポーネント化している
   steps:
     - run: |
         aws cloudformation deploy \
