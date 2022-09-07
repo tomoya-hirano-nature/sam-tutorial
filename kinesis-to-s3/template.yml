@@ -12,7 +12,7 @@ Resources:
   StreamDataBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "tom-test-stream-data-bucket-${EnvName}"
+      BucketName: !Sub "tom1-test-stream-data-bucket-${EnvName}"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -26,10 +26,10 @@ Resources:
     Type: AWS::KinesisFirehose::DeliveryStream
     DependsOn: StreamDataBucket
     Properties:
-      DeliveryStreamName: !Sub tom_stream_${EnvName}
+      DeliveryStreamName: !Sub tom1_stream_${EnvName}
       DeliveryStreamType: DirectPut
       ExtendedS3DestinationConfiguration:
-        BucketARN: !Sub "arn:aws:s3:::tom-test-stream-data-bucket-${EnvName}"
+        BucketARN: !Sub "arn:aws:s3:::tom1-test-stream-data-bucket-${EnvName}"
         BufferingHints:
           SizeInMBs: 64
           IntervalInSeconds: 60
@@ -104,14 +104,3 @@ Resources:
                 Action: "*"
                 Resource: "*"
       UserName: !Sub FirehoseUser_${EnvName}
-
-  FirehoseUserAccessKey:
-    Type: AWS::IAM::AccessKey
-    Properties:
-      UserName: !Ref FirehoseUser
-
-  FirehoseUserAccessKeySecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: !Sub FirehoseUser-credentials_${EnvName}
-      SecretString: !Sub '{"accessKeyId":"${FirehoseUserAccessKey}","secretAccessKey":"${FirehoseUserAccessKey.SecretAccessKey}"}'
