@@ -21,3 +21,97 @@ Resources:
       NotificationConfiguration:
         EventBridgeConfiguration:
           EventBridgeEnabled: true
+  
+  KinesisFirehose:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    DependsOn: StreamDataBucket
+    Properties:
+      DeliveryStreamName: !Sub tom_stream_${EnvName}
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !Sub "arn:aws:s3:::tom-test-stream-data-bucket-${EnvName}"
+        BufferingHints:
+          SizeInMBs: 64
+          IntervalInSeconds: 60
+        ErrorOutputPrefix: error/
+        Prefix: uuid/!{partitionKeyFromQuery:uuid}/
+        RoleARN: !Sub "${FirehoseRole.Arn}"
+        DynamicPartitioningConfiguration:
+          Enabled: true
+        ProcessingConfiguration:
+          Enabled: "true"
+          Processors:
+            - Type: MetadataExtraction
+              Parameters:
+                - ParameterName: MetadataExtractionQuery
+                  ParameterValue: "{uuid:.uuid}"
+                - ParameterName: JsonParsingEngine
+                  ParameterValue: JQ-1.6
+  
+  FirehoseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub firehose_role_${EnvName}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - firehose.amazonaws.com
+            Action:
+              - sts:AssumeRole
+
+  DeliveryPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub firehose_delivery_policy_${EnvName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub "arn:aws:s3:::${StreamDataBucket}/*"
+      Roles:
+        - !Ref "FirehoseRole"
+
+  LoggingPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub firehose_logging_policy_${EnvName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:putLogEvents
+            Resource:
+              - "*"
+      Roles:
+        - !Ref "FirehoseRole"
+
+  FirehoseUser:
+    Type: AWS::IAM::User
+    Properties:
+      Policies:
+        - PolicyName: !Sub firehose_delivery_policy_${EnvName}
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "*"
+                Resource: "*"
+      UserName: !Sub FirehoseUser_${EnvName}
+
+  FirehoseUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref FirehoseUser
+
+  FirehoseUserAccessKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub FirehoseUser-credentials_${EnvName}
+      SecretString: !Sub '{"accessKeyId":"${FirehoseUserAccessKey}","secretAccessKey":"${FirehoseUserAccessKey.SecretAccessKey}"}'
